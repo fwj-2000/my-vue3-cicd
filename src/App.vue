@@ -1,0 +1,11 @@
+<script setup>
+import chatPage from "@/views/chatPage.vue";
+</script>
+
+<template>
+  <div>
+    <chatPage />
+  </div>
+</template>
+
+<style scoped lang="less"></style>
