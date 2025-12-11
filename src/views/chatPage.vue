@@ -30,7 +30,7 @@ const streamUrl = ref(""); // 数字人流地址，实际使用时需要替换
 const { connectionStatus, connectionStatusText, messages, addMessage } =
   useWebSocket(wsUrl, {
     reconnectInterval: 5000,
-    heartbeatInterval: 30000,
+    heartbeatInterval: 10000,
     mock: true, // 启用模拟模式
   });
 
