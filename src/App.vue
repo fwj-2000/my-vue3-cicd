@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import chatPage from "@/views/chatPage.vue";
 </script>
 
