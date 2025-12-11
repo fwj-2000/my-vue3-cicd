@@ -1,17 +1,26 @@
 <template>
   <div class="chat-area">
     <!-- 连接状态提示 -->
-    <div class="connection-status" :class="{ 'connected': connectionStatus === 'connected', 'disconnected': connectionStatus === 'disconnected', 'connecting': connectionStatus === 'connecting' }">
+    <div
+      class="connection-status"
+      :class="{
+        connected: connectionStatus === 'connected',
+        disconnected: connectionStatus === 'disconnected',
+        connecting: connectionStatus === 'connecting',
+      }"
+    >
       {{ connectionStatusText }}
     </div>
-    
+
     <!-- 对话消息列表 -->
     <div class="chat-messages" ref="messagesContainer">
-      <div 
-        v-for="(message, index) in messages" 
+      <div
+        v-for="(message, index) in messages"
         :key="index"
         class="message-item"
-        :class="message.sender === 'user' ? 'user-message' : 'assistant-message'"
+        :class="
+          message.sender === 'user' ? 'user-message' : 'assistant-message'
+        "
       >
         <div class="message-bubble">
           <div class="message-content">{{ message.content }}</div>
@@ -23,22 +32,22 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, useTemplateRef } from "vue";
 
 // Props
 const props = defineProps({
   messages: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   connectionStatus: {
     type: String,
-    default: 'disconnected' // connected, disconnected, connecting
+    default: "disconnected", // connected, disconnected, connecting
   },
   connectionStatusText: {
     type: String,
-    default: '未连接'
-  }
+    default: "未连接",
+  },
 });
 
 // 消息容器引用，用于自动滚动
@@ -47,8 +56,8 @@ const messagesContainer = ref(null);
 // 格式化时间
 const formatTime = (timestamp) => {
   const date = new Date(timestamp);
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
   return `${hours}:${minutes}`;
 };
 
@@ -60,12 +69,16 @@ const scrollToBottom = () => {
 };
 
 // 监听消息变化，自动滚动到底部
-watch(() => props.messages, () => {
-  // 使用setTimeout确保DOM已更新
-  setTimeout(() => {
-    scrollToBottom();
-  }, 0);
-}, { deep: true });
+watch(
+  () => props.messages,
+  () => {
+    // 使用setTimeout确保DOM已更新
+    setTimeout(() => {
+      scrollToBottom();
+    }, 0);
+  },
+  { deep: true }
+);
 </script>
 
 <style lang="less" scoped>
@@ -75,7 +88,7 @@ watch(() => props.messages, () => {
   flex-direction: column;
   background-color: #fff;
   height: 100%;
-  
+
   // 连接状态提示
   .connection-status {
     padding: 8px 16px;
@@ -83,40 +96,40 @@ watch(() => props.messages, () => {
     text-align: center;
     background-color: #f5f5f5;
     border-bottom: 1px solid #e0e0e0;
-    
+
     &.connected {
       background-color: #e8f5e8;
       color: #2e7d32;
     }
-    
+
     &.disconnected {
       background-color: #ffebee;
       color: #c62828;
     }
-    
+
     &.connecting {
       background-color: #fff3e0;
       color: #ef6c00;
     }
   }
-  
+
   // 对话消息列表
   .chat-messages {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
     background-color: #fafafa;
-    
+
     // 消息项
     .message-item {
       display: flex;
       margin-bottom: 16px;
       animation: fadeIn 0.3s ease;
-      
+
       // 用户消息（右侧）
       &.user-message {
         justify-content: flex-end;
-        
+
         .message-bubble {
           background-color: #1989fa;
           color: #fff;
@@ -125,11 +138,11 @@ watch(() => props.messages, () => {
           margin-left: auto;
         }
       }
-      
+
       // 助手消息（左侧）
       &.assistant-message {
         justify-content: flex-start;
-        
+
         .message-bubble {
           background-color: #fff;
           color: #333;
@@ -139,13 +152,13 @@ watch(() => props.messages, () => {
           margin-left: 0;
         }
       }
-      
+
       // 消息气泡
       .message-bubble {
         max-width: 70%;
         padding: 12px 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        
+
         // 消息内容
         .message-content {
           font-size: 14px;
@@ -154,7 +167,7 @@ watch(() => props.messages, () => {
           word-wrap: break-word;
           word-break: break-word;
         }
-        
+
         // 消息时间
         .message-time {
           font-size: 11px;

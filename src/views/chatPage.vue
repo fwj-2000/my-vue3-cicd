@@ -31,20 +31,17 @@ const { connectionStatus, connectionStatusText, messages, addMessage } =
   useWebSocket(wsUrl, {
     reconnectInterval: 5000,
     heartbeatInterval: 30000,
+    mock: true, // 启用模拟模式
   });
 
 // 组件挂载时添加模拟消息用于测试
 onMounted(() => {
   // 模拟两条初始消息，用于测试
-  addMessage("user", "你好，我想了解一下这个项目");
-  addMessage(
-    "assistant",
-    "你好！我是智能助手，很高兴为你服务。请问你想了解项目的哪些方面？"
-  );
-  addMessage(
-    "user",
-    "你好！我是智能助手，很高兴为你服务。请问你想了解项目的哪些方面？"
-  );
+  // addMessage("user", "你好，我想了解一下这个项目");
+  // addMessage(
+  //   "assistant",
+  //   "你好！我是智能助手，很高兴为你服务。请问你想了解项目的哪些方面？"
+  // );
 });
 </script>
 
