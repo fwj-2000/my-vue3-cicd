@@ -87,23 +87,34 @@ export const useWebSocket = (url, options = {}) => {
        */
       ws.onmessage = (event) => {
         try {
-          // 将收到的JSON格式字符串转换为JavaScript对象
-          // 服务器发送的消息就像一封加密信，需要解析才能看懂
           const message = JSON.parse(event.data);
-          console.log('收到消息:', message); // 在控制台打印收到的消息
+          console.log('收到消息:', message);
 
-          // 处理心跳消息：如果是心跳消息，只需要确认连接正常，不需要显示在聊天窗口
-          if (message.type === 'heartbeat') {
-            return; // 直接返回，不做其他处理
-          }
-
-          // 处理对话消息：如果是普通对话消息，添加到消息列表
-          if (message.type === 'message') {
-            // 调用addMessage函数，将消息添加到消息列表
-            addMessage(message.sender, message.content);
+          switch (message.type) {
+            case 'heartbeat':
+              // 处理心跳消息，无需特殊处理，连接正常
+              console.log('心跳响应，连接正常');
+              break;
+            case 'message':
+              // 处理对话消息
+              const sender = message.data?.sender || message.sender;
+              const content = message.data?.content || message.content;
+              const contentType = message.data?.contentType || message.contentType || 'text';
+              addMessage(sender, content, contentType);
+              break;
+            case 'stream':
+              // 处理数字人流状态消息
+              if (message.data) {
+                // 可以在这里添加流状态处理逻辑
+                console.log('数字人流状态变化:', message.data.status);
+                // 例如：更新数字人流状态，通知数字人组件
+                // emit('stream-status-change', message.data);
+              }
+              break;
+            default:
+              console.warn('未知消息类型:', message.type);
           }
         } catch (error) {
-          // 如果消息解析失败，在控制台打印错误信息
           console.error('消息解析失败:', error);
         }
       };
@@ -157,12 +168,13 @@ export const useWebSocket = (url, options = {}) => {
    * @param {string} sender - 发送者：'user'(用户/提问方) 或 'assistant'(助手/回答方)
    * @param {string} content - 消息内容，也就是说话的内容
    */
-  const addMessage = (sender, content) => {
-    // 创建消息对象：包含发送者、内容和当前时间
+  const addMessage = (sender, content, contentType = 'text', timestamp) => {
+    // 创建消息对象：包含发送者、内容、类型和当前时间
     const message = {
       sender, // 谁发的消息
       content, // 消息内容
-      timestamp: Date.now() // 消息发送的时间戳，用于显示发送时间
+      contentType, // 内容类型
+      timestamp // 消息发送的时间戳
     };
     // 将消息添加到消息数组中，Vue会自动更新页面，显示新消息
     messages.value.push(message);
@@ -382,12 +394,14 @@ class MockWebSocket {
   startMockMessages () {
     // 模拟发送方消息，按照顺序生成对话
     const mockMessages = [
-      { sender: 'user', content: '你好，我想了解这个项目' },
-      { sender: 'assistant', content: '你好！我是智能助手，很高兴为你服务' },
-      { sender: 'user', content: '项目的主要功能是什么？' },
-      { sender: 'assistant', content: '我们的项目是一个智能聊天系统，支持实时对话和数字人交互' },
-      { sender: 'user', content: '如何使用这个系统？' },
-      { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流' }
+      { sender: 'user', content: '你好，我想了解这个项目', contentType: 'text' },
+      { sender: 'assistant', content: '你好！我是智能助手，很高兴为你服务', contentType: 'text' },
+      { sender: 'user', content: '能给我看一张项目的截图吗？', contentType: 'text' },
+      { sender: 'assistant', content: 'https://img3.redocn.com/20110418/20110416_6ad206b20544a083fdb0B6Kj0dud4sro.jpg', contentType: 'image' },
+      { sender: 'user', content: '有介绍视频吗？', contentType: 'text' },
+      { sender: 'assistant', content: 'https://vod.v.jstv.com/2025/09/01/JSTV_JSGGNEW_1756730917831_1c7SAd4_1823.mp4', contentType: 'video' },
+      { sender: 'user', content: '如何使用这个系统？', contentType: 'text' },
+      { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' }
     ];
 
     // 定时发送模拟消息：每隔2秒发送一条消息

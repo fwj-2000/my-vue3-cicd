@@ -23,7 +23,42 @@
         "
       >
         <div class="message-bubble">
-          <div class="message-content">{{ message.content }}</div>
+          <!-- 文本消息 -->
+          <div
+            v-if="message.contentType === 'text'"
+            class="message-content text-content"
+          >
+            {{ message.content }}
+          </div>
+
+          <!-- 图片消息 -->
+          <div
+            v-else-if="message.contentType === 'image'"
+            class="message-content image-content"
+          >
+            <img :src="message.content" alt="图片" class="message-image" />
+          </div>
+
+          <!-- 视频消息 -->
+          <div
+            v-else-if="message.contentType === 'video'"
+            class="message-content video-content"
+          >
+            <video
+              :src="message.content"
+              autoplay
+              controls
+              class="message-video"
+            >
+              您的浏览器不支持视频播放
+            </video>
+          </div>
+
+          <!-- 其他类型消息 -->
+          <div v-else class="message-content">
+            {{ message.content }}
+          </div>
+          <!-- <div class="message-content">{{ message.content }}</div> -->
           <div class="message-time">{{ formatTime(message.timestamp) }}</div>
         </div>
       </div>
@@ -178,7 +213,26 @@ watch(
     }
   }
 }
+/* 多媒体消息样式 */
+.image-content,
+.video-content {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
 
+.message-image {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.message-video {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+}
 // 消息淡入动画
 @keyframes fadeIn {
   from {
