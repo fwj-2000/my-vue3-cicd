@@ -394,7 +394,6 @@ class MockWebSocket {
   startMockMessages () {
     // 模拟发送方消息，按照顺序生成对话
     const mockMessages = [
-      { sender: 'user', content: '你好，我想了解这个项目', contentType: 'text' },
       { sender: 'assistant', content: '你好！我是智能助手，很高兴为你服务', contentType: 'text' },
       { sender: 'user', content: '能给我看一张项目的截图吗？', contentType: 'text' },
       { sender: 'assistant', content: 'https://img3.redocn.com/20110418/20110416_6ad206b20544a083fdb0B6Kj0dud4sro.jpg', contentType: 'image' },

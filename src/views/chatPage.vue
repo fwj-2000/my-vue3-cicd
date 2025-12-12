@@ -24,7 +24,7 @@ import { useWebSocket } from "../hooks/useWebSocket";
 
 // WebSocket配置
 const wsUrl = "ws://localhost:8080"; // WebSocket服务器地址，实际使用时需要替换
-const streamUrl = ref(""); // 数字人流地址，实际使用时需要替换
+const streamUrl = ref("http://10.16.17.225:9090/video_feed"); // 数字人流地址，实际使用时需要替换
 
 // 使用WebSocket hooks
 const { connectionStatus, connectionStatusText, messages, addMessage } =

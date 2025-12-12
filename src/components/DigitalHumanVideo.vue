@@ -8,15 +8,29 @@
     </div>
 
     <div class="digital-human-container">
-      <!-- 数字人流播放容器 这个比例大小后面在调整-->
+      <!-- 数字人流播放容器 -->
       <img
         id="video"
         v-if="streamUrl"
         :src="streamUrl"
-        width="90%"
-        height="100%"
+        width="640"
+        height="480"
         alt="摄像头视频流"
       />
+      <!-- <video 
+        v-if="streamUrl" 
+        ref="videoRef"
+        class="digital-human-video"
+        autoplay 
+        muted 
+        playsinline
+        @play="onStreamPlay"
+        @pause="onStreamPause"
+        @error="onStreamError"
+      >
+        <source :src="streamUrl" type="video/mp4">
+        您的浏览器不支持视频播放
+      </video> -->
 
       <!-- 加载状态 -->
       <div v-else class="loading-container">
@@ -41,9 +55,31 @@ const props = defineProps({
 // 流状态管理
 const streamStatus = ref("loading"); // loading, playing, paused, error
 const streamStatusText = ref("数字人流加载中...");
+const videoRef = ref(null);
+
+// 数字人流事件处理
+const onStreamPlay = () => {
+  streamStatus.value = "playing";
+  streamStatusText.value = "播放中";
+};
+
+const onStreamPause = () => {
+  streamStatus.value = "paused";
+  streamStatusText.value = "已暂停";
+};
+
+const onStreamError = () => {
+  streamStatus.value = "error";
+  streamStatusText.value = "流播放错误";
+};
 
 // 组件卸载前停止视频播放
-onBeforeUnmount(() => {});
+onBeforeUnmount(() => {
+  if (videoRef.value) {
+    videoRef.value.pause();
+    videoRef.value.src = "";
+  }
+});
 </script>
 
 <style lang="less" scoped>
