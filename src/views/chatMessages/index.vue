@@ -1,83 +1,27 @@
 <template>
   <div class="chat-area">
     <!-- 连接状态提示 -->
-    <div
-      class="connection-status"
-      :class="{
-        connected: connectionStatus === 'connected',
-        disconnected: connectionStatus === 'disconnected',
-        connecting: connectionStatus === 'connecting',
-      }"
-    >
-      {{ connectionStatusText }}
-    </div>
+    <ConnectionStatus
+      :status="connectionStatus"
+      :status-text="connectionStatusText"
+    />
 
     <!-- 对话消息列表 -->
     <div class="chat-messages" ref="messagesContainer">
-      <div
+      <MessageItem
         v-for="(message, index) in messages"
         :key="index"
-        class="message-item"
-        :class="
-          message.sender === 'user' ? 'user-message' : 'assistant-message'
-        "
-      >
-        <div class="message-bubble">
-          <!-- 文本消息 -->
-          <div
-            v-if="message.contentType === 'text'"
-            class="message-content text-content"
-          >
-            {{ message.content }}
-          </div>
-
-          <!-- 图片消息 -->
-          <div
-            v-else-if="message.contentType === 'image'"
-            class="message-content image-content"
-          >
-            <img :src="message.content" alt="图片" class="message-image" />
-          </div>
-
-          <!-- 视频消息 -->
-          <div
-            v-else-if="message.contentType === 'video'"
-            class="message-content video-content"
-          >
-            <video
-              :src="message.content"
-              autoplay
-              controls
-              class="message-video"
-            >
-              您的浏览器不支持视频播放
-            </video>
-          </div>
-
-          <!-- 其他类型消息 -->
-          <div v-else class="message-content">
-            {{ message.content }}
-          </div>
-
-          <div class="message-time">{{ formatTime(message.timestamp) }}</div>
-
-          <div class="tagList">
-            <span
-              v-for="(tag, index) in message.contentList"
-              :key="index"
-              class="tag"
-            >
-              {{ tag }}
-            </span>
-          </div>
-        </div>
-      </div>
+        :message="message"
+        @tag-click="handleTagClick"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from "vue";
+import ConnectionStatus from "./components/ConnectionStatus.vue";
+import MessageItem from "./components/MessageItem.vue";
 
 // Props
 const props = defineProps({
@@ -95,16 +39,10 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(["tag-click"]);
+
 // 消息容器引用，用于自动滚动
 const messagesContainer = ref(null);
-
-// 格式化时间
-const formatTime = (timestamp) => {
-  const date = new Date(timestamp);
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  return `${hours}:${minutes}`;
-};
 
 // 滚动到底部
 const scrollToBottom = () => {
@@ -124,6 +62,11 @@ watch(
   },
   { deep: true }
 );
+
+// 处理标签点击事件
+const handleTagClick = (tag) => {
+  emit("tag-click", tag);
+};
 </script>
 
 <style lang="less" scoped>
@@ -134,157 +77,12 @@ watch(
   background-color: #fff;
   height: 100%;
 
-  // 连接状态提示
-  .connection-status {
-    padding: 8px 16px;
-    font-size: 12px;
-    text-align: center;
-    background-color: #f5f5f5;
-    border-bottom: 1px solid #e0e0e0;
-
-    &.connected {
-      background-color: #e8f5e8;
-      color: #2e7d32;
-    }
-
-    &.disconnected {
-      background-color: #ffebee;
-      color: #c62828;
-    }
-
-    &.connecting {
-      background-color: #fff3e0;
-      color: #ef6c00;
-    }
-  }
-
   // 对话消息列表
   .chat-messages {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
     background-color: #fafafa;
-
-    // 消息项
-    .message-item {
-      display: flex;
-      margin-bottom: 16px;
-      animation: fadeIn 0.3s ease;
-
-      // 用户消息（右侧）
-      &.user-message {
-        justify-content: flex-end;
-
-        .message-bubble {
-          background-color: #1989fa;
-          color: #fff;
-          border-radius: 18px 18px 4px 18px;
-          margin-right: 0;
-          margin-left: auto;
-        }
-      }
-
-      // 助手消息（左侧）
-      &.assistant-message {
-        justify-content: flex-start;
-
-        .message-bubble {
-          background-color: #fff;
-          color: #333;
-          border-radius: 18px 18px 18px 4px;
-          border: 1px solid #e0e0e0;
-          margin-right: auto;
-          margin-left: 0;
-        }
-      }
-
-      // 消息气泡
-      .message-bubble {
-        max-width: 70%;
-        padding: 12px 16px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-        // 消息内容
-        .message-content {
-          font-size: 14px;
-          line-height: 1.5;
-          margin-bottom: 4px;
-          word-wrap: break-word;
-          word-break: break-word;
-        }
-
-        // 消息时间
-        .message-time {
-          font-size: 11px;
-          opacity: 0.7;
-          text-align: right;
-          // margin-bottom: 8px;
-        }
-
-        // 标签列表
-        .tagList {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-top: 8px;
-        }
-
-        // 单个标签
-        .tag {
-          display: inline-block;
-          padding: 2px 10px;
-          background-color: #e8f3ff;
-          color: #1989fa;
-          border: 1px solid #c6e1ff;
-          border-radius: 16px;
-          font-size: 12px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-
-          &:hover {
-            background-color: #d6eaff;
-            border-color: #1989fa;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(25, 137, 250, 0.2);
-          }
-
-          &:active {
-            transform: translateY(0);
-          }
-        }
-      }
-    }
-  }
-}
-/* 多媒体消息样式 */
-.image-content,
-.video-content {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 8px;
-}
-
-.message-image {
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 8px;
-  object-fit: contain;
-}
-
-.message-video {
-  max-width: 100%;
-  max-height: 300px;
-  border-radius: 8px;
-}
-// 消息淡入动画
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 </style>
