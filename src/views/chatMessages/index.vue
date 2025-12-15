@@ -58,8 +58,18 @@
           <div v-else class="message-content">
             {{ message.content }}
           </div>
-          <!-- <div class="message-content">{{ message.content }}</div> -->
+
           <div class="message-time">{{ formatTime(message.timestamp) }}</div>
+
+          <div class="tagList">
+            <span
+              v-for="(tag, index) in message.contentList"
+              :key="index"
+              class="tag"
+            >
+              {{ tag }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -67,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, watch, useTemplateRef } from "vue";
+import { ref, watch } from "vue";
 
 // Props
 const props = defineProps({
@@ -208,6 +218,39 @@ watch(
           font-size: 11px;
           opacity: 0.7;
           text-align: right;
+          // margin-bottom: 8px;
+        }
+
+        // 标签列表
+        .tagList {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 8px;
+        }
+
+        // 单个标签
+        .tag {
+          display: inline-block;
+          padding: 2px 10px;
+          background-color: #e8f3ff;
+          color: #1989fa;
+          border: 1px solid #c6e1ff;
+          border-radius: 16px;
+          font-size: 12px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background-color: #d6eaff;
+            border-color: #1989fa;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(25, 137, 250, 0.2);
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
         }
       }
     }

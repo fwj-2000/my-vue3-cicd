@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import chatPage from "@/views/chatPage.vue";
+import chatPage from "@/views/chatPage/index.vue";
 </script>
 
 <template>

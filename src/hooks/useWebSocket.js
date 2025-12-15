@@ -97,10 +97,8 @@ export const useWebSocket = (url, options = {}) => {
               break;
             case 'message':
               // 处理对话消息
-              const sender = message.data?.sender || message.sender;
-              const content = message.data?.content || message.content;
-              const contentType = message.data?.contentType || message.contentType || 'text';
-              addMessage(sender, content, contentType);
+              const { sender, content, contentType, timestamp, contentList } = message;
+              addMessage(sender, content, contentType, timestamp, contentList);
               break;
             case 'stream':
               // 处理数字人流状态消息
@@ -168,13 +166,14 @@ export const useWebSocket = (url, options = {}) => {
    * @param {string} sender - 发送者：'user'(用户/提问方) 或 'assistant'(助手/回答方)
    * @param {string} content - 消息内容，也就是说话的内容
    */
-  const addMessage = (sender, content, contentType = 'text', timestamp) => {
+  const addMessage = (sender, content, contentType = 'text', timestamp, contentList) => {
     // 创建消息对象：包含发送者、内容、类型和当前时间
     const message = {
       sender, // 谁发的消息
       content, // 消息内容
       contentType, // 内容类型
-      timestamp // 消息发送的时间戳
+      timestamp, // 消息发送的时间戳
+      contentList
     };
     // 将消息添加到消息数组中，Vue会自动更新页面，显示新消息
     messages.value.push(message);
@@ -394,8 +393,14 @@ class MockWebSocket {
   startMockMessages () {
     // 模拟发送方消息，按照顺序生成对话
     const mockMessages = [
-      { sender: 'assistant', content: '你好！我是智能助手，很高兴为你服务', contentType: 'text' },
-      { sender: 'user', content: '能给我看一张项目的截图吗？', contentType: 'text' },
+      {
+        sender: 'assistant',
+        content: '你好！我是智能助手，很高兴为你服务',
+        contentType: 'text',
+        contentList: ['首件过程的检测频率如何？', '针对不可检测项，如何预防不良流出？', '项目检测过程中，如何避免设备故障？', '如何联系客服？'],
+        timestamp: Date.now() // 消息发送的时间戳
+      },
+      { sender: 'user', content: '能给我看一张项目的截图吗？', contentType: 'text', timestamp: Date.now() },
       { sender: 'assistant', content: 'https://img3.redocn.com/20110418/20110416_6ad206b20544a083fdb0B6Kj0dud4sro.jpg', contentType: 'image' },
       { sender: 'user', content: '有介绍视频吗？', contentType: 'text' },
       { sender: 'assistant', content: 'https://vod.v.jstv.com/2025/09/01/JSTV_JSGGNEW_1756730917831_1c7SAd4_1823.mp4', contentType: 'video' },
@@ -420,6 +425,7 @@ class MockWebSocket {
         ...mockMsg, // 包含sender和content
         timestamp: Date.now() // 消息发送的时间戳
       };
+      console.log("🚀 ~ MockWebSocket ~ startMockMessages ~ message:", message)
 
       // 如果设置了onmessage回调，就调用它，将模拟消息传递给组件
       if (this.onmessage) {
