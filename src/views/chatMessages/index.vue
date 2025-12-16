@@ -69,20 +69,48 @@ const handleTagClick = (tag) => {
 };
 </script>
 
-<style lang="less" scoped>
+<style scoped lang="less">
+@import "@/assets/styles/variables.less";
+
 .chat-area {
   width: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #fff;
+  background-color: @chat-bg;
   height: 100%;
+  font-family: @font-family;
 
   // 对话消息列表
   .chat-messages {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
-    background-color: #fafafa;
+    padding: @spacing-md;
+    background-color: @chat-bg;
+    scroll-behavior: smooth;
+
+    // 自定义滚动条
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: @light-border;
+      border-radius: @radius-sm;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: @radius-sm;
+
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
+
+    &::-webkit-scrollbar-corner {
+      background: @light-border;
+    }
   }
 }
 </style>

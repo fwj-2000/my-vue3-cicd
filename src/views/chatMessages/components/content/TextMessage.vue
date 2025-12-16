@@ -14,11 +14,15 @@ const props = defineProps({
 </script>
 
 <style scoped lang="less">
+@import '@/assets/styles/variables.less';
+
 .text-content {
-  font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: 4px;
+  font-size: @font-size-base;
+  line-height: @line-height-lg;
+  margin-bottom: @spacing-xs;
   word-wrap: break-word;
   word-break: break-word;
+  font-family: @font-family;
+  color: inherit; // 继承父元素颜色
 }
 </style>

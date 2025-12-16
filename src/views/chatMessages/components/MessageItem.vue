@@ -70,21 +70,36 @@ const handleTagClick = (tag) => {
 </script>
 
 <style scoped lang="less">
+@import '@/assets/styles/variables.less';
+
 .message-item {
   display: flex;
-  margin-bottom: 16px;
-  animation: fadeIn 0.3s ease;
+  margin-bottom: @message-margin-bottom;
+  animation: slideIn 0.3s ease-out forwards;
+  opacity: 0;
+  transform: translateY(10px);
+  font-family: @font-family;
+
+  // 交错动画效果
+  &:nth-child(odd) {
+    animation-delay: 0.05s;
+  }
 
   // 用户消息（右侧）
   &.user-message {
     justify-content: flex-end;
 
     .message-bubble {
-      background-color: #1989fa;
+      background-color: @primary-color;
       color: #fff;
-      border-radius: 18px 18px 4px 18px;
+      border-radius: @radius-xl @radius-xl @radius-sm @radius-xl;
       margin-right: 0;
       margin-left: auto;
+      box-shadow: 0 2px 8px rgba(25, 137, 250, 0.3);
+    }
+    
+    .message-time {
+      color: rgba(255, 255, 255, 0.7);
     }
   }
 
@@ -93,42 +108,51 @@ const handleTagClick = (tag) => {
     justify-content: flex-start;
 
     .message-bubble {
-      background-color: #fff;
-      color: #333;
-      border-radius: 18px 18px 18px 4px;
-      border: 1px solid #e0e0e0;
+      background-color: @bubble-bg;
+      color: @text-color;
+      border-radius: @radius-xl @radius-xl @radius-xl @radius-sm;
+      border: 1px solid @border-color;
       margin-right: auto;
       margin-left: 0;
+      box-shadow: @shadow-sm;
+    }
+    
+    .message-time {
+      color: @light-text;
     }
   }
 
   // 消息气泡
   .message-bubble {
-    max-width: 70%;
-    padding: 12px 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: @message-max-width;
+    padding: @message-padding;
+    transition: box-shadow @transition-base;
+    
+    &:hover {
+      box-shadow: @shadow-md;
+    }
 
     // 消息内容
     .message-content {
-      font-size: 14px;
-      line-height: 1.5;
-      margin-bottom: 4px;
+      font-size: @font-size-base;
+      line-height: @line-height-lg;
+      margin-bottom: @spacing-xs;
       word-wrap: break-word;
       word-break: break-word;
     }
 
     // 消息时间
     .message-time {
-      font-size: 11px;
+      font-size: @font-size-xs;
       opacity: 0.7;
       text-align: right;
-      // margin-bottom: 8px;
+      margin-top: @spacing-xs;
     }
   }
 }
 
-// 消息淡入动画
-@keyframes fadeIn {
+// 消息滑入动画
+@keyframes slideIn {
   from {
     opacity: 0;
     transform: translateY(10px);
