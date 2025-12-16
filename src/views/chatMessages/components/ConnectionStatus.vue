@@ -26,7 +26,6 @@ const props = defineProps({
 
 <style scoped lang="less">
 .connection-status {
-  padding: 8px 16px;
   font-size: 12px;
   text-align: center;
   background-color: #f5f5f5;

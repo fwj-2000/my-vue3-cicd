@@ -400,12 +400,16 @@ class MockWebSocket {
         contentList: ['首件过程的检测频率如何？', '针对不可检测项，如何预防不良流出？', '项目检测过程中，如何避免设备故障？', '如何联系客服？'],
         timestamp: Date.now() // 消息发送的时间戳
       },
-      { sender: 'user', content: '能给我看一张项目的截图吗？', contentType: 'text', timestamp: Date.now() },
-      { sender: 'assistant', content: 'https://img3.redocn.com/20110418/20110416_6ad206b20544a083fdb0B6Kj0dud4sro.jpg', contentType: 'image' },
-      { sender: 'user', content: '有介绍视频吗？', contentType: 'text' },
-      { sender: 'assistant', content: 'https://vod.v.jstv.com/2025/09/01/JSTV_JSGGNEW_1756730917831_1c7SAd4_1823.mp4', contentType: 'video' },
+      // { sender: 'user', content: '能给我看一张项目的截图吗？', contentType: 'text', timestamp: Date.now() },
+      // { sender: 'assistant', content: 'https://img3.redocn.com/20110418/20110416_6ad206b20544a083fdb0B6Kj0dud4sro.jpg', contentType: 'image' },
+      // { sender: 'user', content: '有介绍视频吗？', contentType: 'text' },
+      // { sender: 'assistant', content: 'https://vod.v.jstv.com/2025/09/01/JSTV_JSGGNEW_1756730917831_1c7SAd4_1823.mp4', contentType: 'video' },
       { sender: 'user', content: '如何使用这个系统？', contentType: 'text' },
-      { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' }
+      { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
+      { sender: 'user', content: '如何使用这个系统？', contentType: 'text' },
+      { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
+      { sender: 'user', content: '如何使用这个系统？', contentType: 'text' },
+      { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
     ];
 
     // 定时发送模拟消息：每隔2秒发送一条消息
