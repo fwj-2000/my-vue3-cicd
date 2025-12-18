@@ -50,10 +50,10 @@ onBeforeUnmount(() => {});
 @import "@/assets/styles/variables.less";
 .digital-human-area {
   width: 100%;
-  background-color: #000;
+  // background-color: #000;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #e0e0e0;
+  // border-right: 1px solid #e0e0e0;
   height: 100%;
 
   // 数字人流头部
@@ -64,7 +64,7 @@ onBeforeUnmount(() => {});
     padding: 2px 6px;
     background-color: rgba(0, 0, 0, 0.8);
     color: #fff;
-    border-bottom: 1px solid #333;
+    // border-bottom: 1px solid #333;
 
     h3 {
       margin: 0;
@@ -109,7 +109,7 @@ onBeforeUnmount(() => {});
     align-items: center;
     justify-content: center;
     position: relative;
-    background-color: #000;
+    // background-color: #000;
 
     // 视频播放
     .digital-human-video {

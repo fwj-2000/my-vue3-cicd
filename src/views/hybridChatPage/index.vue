@@ -38,7 +38,10 @@ defineOptions({
 
 // 轮询配置
 const wsUrl = "http://localhost:8080"; // 轮询服务器地址，实际使用时需要替换
-const streamUrl = ref("http://10.16.17.82:9090/video_feed.mjpeg?1766041993276"); // 数字人流地址，实际使用时需要替换
+const streamUrl = ref(
+  "https://tse4.mm.bing.net/th/id/OIP.rcb4RfaHESenvNLHeQx0agHaJ1?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3"
+); // 数字人流地址，实际使用时需要替换
+// const streamUrl = ref("http://10.16.17.82:9090/video_feed.mjpeg?1766041993276"); // 数字人流地址，实际使用时需要替换
 
 // 使用轮询 hooks
 const { connectionStatus, connectionStatusText, messages, addMessage } =
@@ -60,12 +63,13 @@ onMounted(() => {
 </script>
 
 <style lang="less" scoped>
+@import "@/assets/styles/variables.less";
+
 .hybrid-chat-container {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background-color: #f5f5f5;
 }
 
 /* 左侧区域 */
@@ -92,7 +96,7 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 40%; /* 可自定义高度 */
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: @chat-bg; /* 白色半透明，透明度可调整（0.3为30%透明） */
   box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.3);
   border-radius: 16px 16px 0 0;
   overflow: hidden;

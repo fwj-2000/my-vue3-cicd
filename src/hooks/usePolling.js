@@ -196,7 +196,7 @@ export const usePolling = (url, options = {}) => {
         sender: 'assistant',
         content: '你好！我是智能助手，很高兴为你服务',
         contentType: 'text',
-        contentList: ['首件过程的检测频率如何？', '针对不可检测项，如何预防不良流出？', '项目检测过程中，如何避免设备故障？', '如何联系客服？'],
+        // contentList: ['首件过程的检测频率如何？', '针对不可检测项，如何预防不良流出？', '项目检测过程中，如何避免设备故障？', '如何联系客服？'],
         timestamp: Date.now()
       },
       { sender: 'user', content: '如何使用这个系统？', contentType: 'text', timestamp: Date.now() },

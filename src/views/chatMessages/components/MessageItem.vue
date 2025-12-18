@@ -53,11 +53,11 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['tag-click']);
+const emit = defineEmits(["tag-click"]);
 
 // 格式化时间
 const formatTime = (timestamp) => {
-  if (!timestamp) return '';
+  if (!timestamp) return "";
   const date = new Date(timestamp);
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
@@ -65,12 +65,12 @@ const formatTime = (timestamp) => {
 };
 
 const handleTagClick = (tag) => {
-  emit('tag-click', tag);
+  emit("tag-click", tag);
 };
 </script>
 
 <style scoped lang="less">
-@import '@/assets/styles/variables.less';
+@import "@/assets/styles/variables.less";
 
 .message-item {
   display: flex;
@@ -91,13 +91,14 @@ const handleTagClick = (tag) => {
 
     .message-bubble {
       background-color: @primary-color;
+      opacity: @opacity-disabled;
       color: #fff;
       border-radius: @radius-xl @radius-xl @radius-sm @radius-xl;
       margin-right: 0;
       margin-left: auto;
       box-shadow: 0 2px 8px rgba(25, 137, 250, 0.3);
     }
-    
+
     .message-time {
       color: rgba(255, 255, 255, 0.7);
     }
@@ -109,6 +110,7 @@ const handleTagClick = (tag) => {
 
     .message-bubble {
       background-color: @bubble-bg;
+      opacity: @opacity-disabled;
       color: @text-color;
       border-radius: @radius-xl @radius-xl @radius-xl @radius-sm;
       border: 1px solid @border-color;
@@ -116,7 +118,7 @@ const handleTagClick = (tag) => {
       margin-left: 0;
       box-shadow: @shadow-sm;
     }
-    
+
     .message-time {
       color: @light-text;
     }
@@ -127,7 +129,7 @@ const handleTagClick = (tag) => {
     max-width: @message-max-width;
     padding: @message-padding;
     transition: box-shadow @transition-base;
-    
+
     &:hover {
       box-shadow: @shadow-md;
     }

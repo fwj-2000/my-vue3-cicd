@@ -28,21 +28,20 @@ const props = defineProps({
 .connection-status {
   font-size: 12px;
   text-align: center;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: transparent;
 
   &.connected {
-    background-color: #e8f5e8;
+    background-color: transparent;
     color: #2e7d32;
   }
 
   &.disconnected {
-    background-color: #ffebee;
+    background-color: transparent;
     color: #c62828;
   }
 
   &.connecting {
-    background-color: #fff3e0;
+    background-color: transparent;
     color: #ef6c00;
   }
 }
