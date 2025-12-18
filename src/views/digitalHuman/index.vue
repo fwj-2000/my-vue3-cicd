@@ -1,7 +1,7 @@
 <template>
   <div class="digital-human-area">
     <div class="digital-human-header">
-      <h3>数字人</h3>
+      <h3>领益数字人</h3>
       <div class="stream-status" :class="streamStatus">
         {{ streamStatusText }}
       </div>
@@ -10,12 +10,12 @@
     <div class="digital-human-container">
       <!-- 数字人流播放容器 这个比例大小后面在调整-->
       <img
-        id="video"
+        id="mjpeg"
         v-if="streamUrl"
         :src="streamUrl"
-        width="90%"
+        width="100%"
         height="100%"
-        alt="摄像头视频流"
+        alt="数字人加载失败"
       />
 
       <!-- 加载状态 -->
@@ -47,6 +47,7 @@ onBeforeUnmount(() => {});
 </script>
 
 <style lang="less" scoped>
+@import "@/assets/styles/variables.less";
 .digital-human-area {
   width: 100%;
   background-color: #000;
@@ -60,7 +61,7 @@ onBeforeUnmount(() => {});
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
+    padding: 2px 6px;
     background-color: rgba(0, 0, 0, 0.8);
     color: #fff;
     border-bottom: 1px solid #333;
@@ -103,7 +104,7 @@ onBeforeUnmount(() => {});
   // 数字人流容器
   .digital-human-container {
     width: 100%;
-    height: calc(100% - 50px);
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;

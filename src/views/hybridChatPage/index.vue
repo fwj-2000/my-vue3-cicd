@@ -18,11 +18,11 @@
     </div>
 
     <!-- 右侧区域：空白占位 -->
-    <div class="right-section">
+    <!-- <div class="right-section">
       <div class="placeholder-content">
         <div class="placeholder-text">空白区域</div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -38,14 +38,14 @@ defineOptions({
 
 // 轮询配置
 const wsUrl = "http://localhost:8080"; // 轮询服务器地址，实际使用时需要替换
-const streamUrl = ref("http://10.16.17.225:9090/video_feed"); // 数字人流地址，实际使用时需要替换
+const streamUrl = ref("http://10.16.17.82:9090/video_feed.mjpeg?1766041993276"); // 数字人流地址，实际使用时需要替换
 
 // 使用轮询 hooks
 const { connectionStatus, connectionStatusText, messages, addMessage } =
   usePolling(wsUrl, {
     pollingInterval: 1000,
     reconnectInterval: 3000,
-    // mock: true, // 启用模拟模式
+    mock: true, // 启用模拟模式
   });
 
 // 组件挂载时添加模拟消息用于测试

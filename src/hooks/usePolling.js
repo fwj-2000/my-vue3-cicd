@@ -3,11 +3,12 @@ import axios from 'axios';
 
 /**
 * 使用axios进行定期轮询的hooks，用于替代WebSocket
-* 
+*
 * @param {string} url - 轮询服务器地址
 * @param {Object} options - 配置选项
 * @param {number} options.pollingInterval - 轮询间隔（毫秒）
 * @param {number} options.reconnectInterval - 重连间隔（毫秒）
+* @param {number} options.timeout - 请求超时时间（毫秒）
 * @param {boolean} options.mock - 是否启用模拟模式
 * @returns {Object} 轮询状态和方法，与useWebSocket相同的API
 */
@@ -16,11 +17,12 @@ export const usePolling = (url, options = {}) => {
   const defaultOptions = {
     pollingInterval: 3000, // 默认3秒轮询一次
     reconnectInterval: 5000, // 默认5秒后重连
+    timeout: 10000, // 默认10秒超时
     mock: false // 默认不使用模拟模式
   };
 
   // 合并默认配置和用户传入的配置
-  const { pollingInterval, reconnectInterval, mock } = { ...defaultOptions, ...options };
+  const { pollingInterval, reconnectInterval, timeout, mock } = { ...defaultOptions, ...options };
 
   // 状态管理
   const connectionStatus = ref('disconnected'); // disconnected, connecting, connected
@@ -31,6 +33,7 @@ export const usePolling = (url, options = {}) => {
   let pollingTimer = null; // 轮询定时器
   let reconnectTimer = null; // 重连定时器
   let lastMessageId = null; // 上一条消息的ID，用于增量获取
+  let isPolling = false; // 标记是否正在执行轮询请求
 
   /**
    * 初始化轮询
@@ -73,13 +76,20 @@ export const usePolling = (url, options = {}) => {
    * 执行轮询请求
    */
   const poll = async () => {
+    // 如果当前正在执行轮询请求，直接返回
+    if (isPolling) {
+      console.log('上一个轮询请求尚未完成，跳过本次请求');
+      return;
+    }
+    isPolling = true;
+
     try {
-      // 发送GET请求获取消息
-      // 这里假设API支持通过lastMessageId参数获取增量消息
+      // 发送GET请求获取消息，添加超时处理
       const response = await axios.get(url, {
         params: {
           lastMessageId: lastMessageId
-        }
+        },
+        timeout: timeout // 添加超时设置
       });
 
       // 处理返回的消息
@@ -92,17 +102,26 @@ export const usePolling = (url, options = {}) => {
         processMessage(response.data);
       }
 
-      // 如果连接状态不是connected，更新为connected
+      // 更新连接状态为已连接
       if (connectionStatus.value !== 'connected') {
         connectionStatus.value = 'connected';
         connectionStatusText.value = '已连接';
       }
     } catch (error) {
       console.error('轮询请求失败:', error);
-      connectionStatus.value = 'disconnected';
-      connectionStatusText.value = '连接错误，正在尝试重连...';
-      stopPolling();
-      startReconnect();
+
+      // 根据错误类型处理
+      if (error.code === 'ECONNABORTED') {
+        console.error('轮询请求超时');
+        connectionStatusText.value = '请求超时，正在重试...';
+      } else {
+        connectionStatus.value = 'disconnected';
+        connectionStatusText.value = '连接错误，正在尝试重连...';
+        stopPolling();
+        startReconnect();
+      }
+    } finally {
+      isPolling = false;
     }
   };
 
@@ -152,8 +171,10 @@ export const usePolling = (url, options = {}) => {
    */
   const sendMessage = async (message) => {
     try {
-      // 使用POST请求发送消息
-      await axios.post(url, message);
+      // 使用POST请求发送消息，添加超时处理
+      await axios.post(url, message, {
+        timeout: timeout
+      });
       console.log('消息发送成功:', message);
     } catch (error) {
       console.error('消息发送失败:', error);
