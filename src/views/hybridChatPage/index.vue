@@ -30,22 +30,22 @@
 import { ref, onMounted } from "vue";
 import DigitalHuman from "../digitalHuman/index.vue";
 import ChatMessages from "../chatMessages/index.vue";
-import { useWebSocket } from "../../hooks/useWebSocket";
+import { usePolling } from "../../hooks/usePolling";
 
 defineOptions({
   name: "hybridChatPage",
 });
 
-// WebSocket配置
-const wsUrl = "ws://localhost:8080"; // WebSocket服务器地址，实际使用时需要替换
+// 轮询配置
+const wsUrl = "http://localhost:8080"; // 轮询服务器地址，实际使用时需要替换
 const streamUrl = ref("http://10.16.17.225:9090/video_feed"); // 数字人流地址，实际使用时需要替换
 
-// 使用WebSocket hooks
+// 使用轮询 hooks
 const { connectionStatus, connectionStatusText, messages, addMessage } =
-  useWebSocket(wsUrl, {
-    reconnectInterval: 5000,
-    heartbeatInterval: 10000,
-    mock: true, // 启用模拟模式
+  usePolling(wsUrl, {
+    pollingInterval: 1000,
+    reconnectInterval: 3000,
+    // mock: true, // 启用模拟模式
   });
 
 // 组件挂载时添加模拟消息用于测试
