@@ -34,6 +34,7 @@ export const usePolling = (url, options = {}) => {
   let reconnectTimer = null; // 重连定时器
   let lastMessageId = null; // 上一条消息的ID，用于增量获取
   let isPolling = false; // 标记是否正在执行轮询请求
+  let lastResponseData = null; // 上一次请求返回的数据缓存，用于去重
 
   /**
    * 初始化轮询
@@ -91,16 +92,36 @@ export const usePolling = (url, options = {}) => {
         },
         timeout: timeout // 添加超时设置
       });
+      const { status, data: message } = response
+      console.log("🚀 ~ poll ~ status, data:", status, message)//
+      //  data: {
+      //     "assistant_text": "非常抱歉，该问题小益还未学习，请咨询人工向导或换个问题，谢谢！",
+      //     "user_text": "OMM 资 源 和 人 力 资 源 怎 么 样"
+      // }
 
-      // 处理返回的消息
-      if (response.data && Array.isArray(response.data)) {
-        response.data.forEach(message => {
-          processMessage(message);
-        });
-      } else if (response.data && response.data.type) {
-        // 单个消息处理
-        processMessage(response.data);
+      // 比较当前数据与上一次数据是否一致，一致则跳过处理
+      const isDataSame = JSON.stringify(message) === JSON.stringify(lastResponseData);
+      if (isDataSame) {
+        console.log('轮询数据未变化，跳过处理');
+        return;
       }
+
+      if (status === 200) {
+        processMessage({ type: "message", ...message })//后端告知固定文本
+        // 更新缓存数据
+        lastResponseData = message;
+      }
+      // 处理返回的消息
+      // {'assistant_text': text, 'user_text': user_text}
+
+      // if (response.data && Array.isArray(response.data)) {
+      //   response.data.forEach(message => {
+      //     processMessage(message);
+      //   });
+      // } else if (response.data && response.data.type) {
+      //   // 单个消息处理
+      //   processMessage(response.data);
+      // }
 
       // 更新连接状态为已连接
       if (connectionStatus.value !== 'connected') {
@@ -131,9 +152,16 @@ export const usePolling = (url, options = {}) => {
   const processMessage = (message) => {
     switch (message.type) {
       case 'message':
+        const { user_text, assistant_text } = message
+        if (user_text) {
+          addMessage('user', user_text)
+        }
+        if (assistant_text) {
+          addMessage('assistant', assistant_text)
+        }
         // 处理对话消息
-        const { sender, content, contentType, timestamp, contentList } = message;
-        addMessage(sender, content, contentType, timestamp, contentList);
+        // const { sender, content, contentType, timestamp, contentList } = message;
+        // addMessage(sender, content, contentType, timestamp, contentList);
         // 更新最后一条消息ID
         lastMessageId = message.id || Date.now();
         break;

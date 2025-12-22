@@ -37,18 +37,20 @@ defineOptions({
 });
 
 // 轮询配置
-const wsUrl = "http://localhost:8080"; // 轮询服务器地址，实际使用时需要替换
+const wsUrl = "/api/json"; // 使用代理地址，避免跨域问题
+// const streamUrl = ref(
+//   "https://tse4.mm.bing.net/th/id/OIP.rcb4RfaHESenvNLHeQx0agHaJ1?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3"
+// ); // //模拟 数字人流地址
 const streamUrl = ref(
-  "https://tse4.mm.bing.net/th/id/OIP.rcb4RfaHESenvNLHeQx0agHaJ1?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3"
-); // 数字人流地址，实际使用时需要替换
-// const streamUrl = ref("http://10.16.17.82:9090/video_feed.mjpeg?1766041993276"); // 数字人流地址，实际使用时需要替换
+  "	http://192.168.1.103:9090/video_feed.mjpeg?1766380563631"
+); //真实 数字人流地址
 
 // 使用轮询 hooks
 const { connectionStatus, connectionStatusText, messages, addMessage } =
   usePolling(wsUrl, {
     pollingInterval: 1000,
     reconnectInterval: 3000,
-    mock: true, // 启用模拟模式
+    // mock: true, // 启用模拟模式
   });
 
 // 组件挂载时添加模拟消息用于测试
