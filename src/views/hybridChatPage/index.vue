@@ -18,11 +18,11 @@
     </div>
 
     <!-- 右侧区域：空白占位 -->
-    <!-- <div class="right-section">
+    <div class="right-section">
       <div class="placeholder-content">
-        <div class="placeholder-text">空白区域</div>
+        <VideoMessage :content="videoUrl" />
       </div>
-    </div> -->
+    </div>
   </div>
 </template>
 
@@ -31,17 +31,19 @@ import { ref, onMounted } from "vue";
 import DigitalHuman from "../digitalHuman/index.vue";
 import ChatMessages from "../chatMessages/index.vue";
 import { usePolling } from "../../hooks/usePolling";
+import VideoMessage from "@/views/chatMessages/components/content/VideoMessage.vue";
 
 defineOptions({
   name: "hybridChatPage",
 });
+// 直接使用相对路径引用视频资源
+const videoUrl = "/src/assets/image/movie.mp4";
 
 // 轮询配置
 const wsUrl = "/api/json"; // 使用代理地址，避免跨域问题
 const streamUrl = ref(
-  `${import.meta.env.VITE_API_BASE_URL}/video_feed.mjpeg?1766380563631`
+  `${import.meta.env.VITE_STREAM_BASE_URL}/video_feed.mjpeg`
 );
-
 // 使用轮询 hooks
 const { connectionStatus, connectionStatusText, messages, addMessage } =
   usePolling(wsUrl, {

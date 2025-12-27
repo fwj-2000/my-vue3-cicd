@@ -157,12 +157,6 @@ export const useWebSocket = (url, options = {}) => {
    * - 将收到的消息格式化后添加到消息数组中
    * - 每条消息包含发送者、内容和当前时间
    * 
-   * 类比：
-   * 就像把对方说的话记录到聊天记录里，每条记录包含：
-   * - 谁发的消息（user表示用户，assistant表示助手）
-   * - 说了什么内容
-   * - 什么时候说的
-   * 
    * @param {string} sender - 发送者：'user'(用户/提问方) 或 'assistant'(助手/回答方)
    * @param {string} content - 消息内容，也就是说话的内容
    */
@@ -172,7 +166,7 @@ export const useWebSocket = (url, options = {}) => {
       sender, // 谁发的消息
       content, // 消息内容
       contentType, // 内容类型
-      timestamp, // 消息发送的时间戳
+      timestamp: timestamp || Date.now(),
       contentList
     };
     // 将消息添加到消息数组中，Vue会自动更新页面，显示新消息

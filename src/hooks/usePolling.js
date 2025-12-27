@@ -184,15 +184,25 @@ export const usePolling = (url, options = {}) => {
   /**
    * 添加消息到对话列表
    */
-  const addMessage = (sender, content, contentType = 'text', timestamp, contentList) => {
+  const addMessage = (sender, content, contentType = 'text', timestamp, contentList, isStreaming = true) => {
+    // 创建消息对象
     const message = {
       sender,
       content,
       contentType,
       timestamp: timestamp || Date.now(),
-      contentList
+      contentList,
+      isStreaming: false // 默认非流式
     };
-    messages.value.push(message);
+
+    // 如果是助手消息且需要流式输出
+    if (isStreaming && sender === 'assistant') {
+      // 先添加完整消息，但标记为非流式
+      messages.value.push(message);
+    } else {
+      // 直接添加消息
+      messages.value.push(message);
+    }
   };
 
   /**

@@ -8,6 +8,8 @@
       <TextMessage
         v-if="message.contentType === 'text'"
         :content="message.content"
+        :enable-typing="message.sender === 'assistant'"
+        :typing-speed="50"
       />
 
       <!-- 图片消息 -->
