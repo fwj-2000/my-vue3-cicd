@@ -242,8 +242,8 @@ export const usePolling = (url, options = {}) => {
       { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
       { sender: 'user', content: '如何使用这个系统？', contentType: 'text' },
       { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
-      { sender: 'user', content: '如何使用这个系统？', contentType: 'text' },
-      { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
+      // { sender: 'user', content: '如何使用这个系统？', contentType: 'text' },
+      // { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
     ];
 
     let index = 0;
