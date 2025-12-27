@@ -136,7 +136,7 @@ const handleTagClick = (tag) => {
 
     // 消息内容
     .message-content {
-      font-size: @font-size-base;
+      font-size: @font-size-xs;
       line-height: @line-height-lg;
       margin-bottom: @spacing-xs;
       word-wrap: break-word;
@@ -145,7 +145,7 @@ const handleTagClick = (tag) => {
 
     // 消息时间
     .message-time {
-      font-size: @font-size-xs;
+      font-size: @font-size-mxs;
       opacity: 0.7;
       text-align: right;
       margin-top: @spacing-xs;
