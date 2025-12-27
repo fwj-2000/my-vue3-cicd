@@ -5,6 +5,8 @@
       autoplay
       preload="auto"
       muted
+      loop
+      controls
       playsinline
       class="message-video"
       @error="handleVideoError"

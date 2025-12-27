@@ -19,9 +19,19 @@
 
     <!-- 右侧区域：空白占位 -->
     <div class="right-section">
-      <div class="placeholder-content">
-        <VideoMessage :content="videoUrl" />
+      <div class="message-video">
+        <video
+          style="width: 100%; height: 100%"
+          :src="videoUrl"
+          autoplay
+          preload="auto"
+          muted
+          loop
+          controls
+          playsinline
+        />
       </div>
+      <!-- <VideoMessage width="100%" :content="videoUrl" /> -->
     </div>
   </div>
 </template>
@@ -31,7 +41,7 @@ import { ref, onMounted } from "vue";
 import DigitalHuman from "../digitalHuman/index.vue";
 import ChatMessages from "../chatMessages/index.vue";
 import { usePolling } from "../../hooks/usePolling";
-import VideoMessage from "@/views/chatMessages/components/content/VideoMessage.vue";
+// import VideoMessage from "@/views/chatMessages/components/content/VideoMessage.vue";
 
 defineOptions({
   name: "hybridChatPage",
@@ -49,7 +59,7 @@ const { connectionStatus, connectionStatusText, messages, addMessage } =
   usePolling(wsUrl, {
     pollingInterval: 1000,
     reconnectInterval: 3000,
-    // mock: true, // 启用模拟模式
+    mock: true, // 启用模拟模式
   });
 
 // 组件挂载时添加模拟消息用于测试
@@ -106,22 +116,10 @@ onMounted(() => {});
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* 空白区域内容 */
-.placeholder-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 40px;
-}
-
-.placeholder-text {
-  font-size: 24px;
-  color: #999;
-  font-weight: 300;
+  .message-video {
+    // width: 100%;
+    // height: 100%;
+  }
 }
 
 /* 响应式设计 */
