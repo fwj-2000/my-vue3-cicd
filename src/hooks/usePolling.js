@@ -152,18 +152,19 @@ export const usePolling = (url, options = {}) => {
   const processMessage = (message) => {
     switch (message.type) {
       case 'message':
-        const { user_text, assistant_text } = message
-        if (user_text) {
-          addMessage('user', user_text)
+        if (mock) {
+          const { sender, content, contentType, timestamp, contentList } = message;
+          addMessage(sender, content, contentType, timestamp, contentList);
+          lastMessageId = message.id || Date.now();
+        } else {
+          const { user_text, assistant_text } = message
+          if (user_text) {
+            addMessage('user', user_text)
+          }
+          if (assistant_text) {
+            addMessage('assistant', assistant_text)
+          }
         }
-        if (assistant_text) {
-          addMessage('assistant', assistant_text)
-        }
-        // 处理对话消息
-        // const { sender, content, contentType, timestamp, contentList } = message;
-        // addMessage(sender, content, contentType, timestamp, contentList);
-        // 更新最后一条消息ID
-        lastMessageId = message.id || Date.now();
         break;
       case 'heartbeat':
         // 处理心跳消息，无需特殊处理
