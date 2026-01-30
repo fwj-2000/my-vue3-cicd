@@ -1,0 +1,29 @@
+name: Vue3-Auto-Build
+
+# 触发条件：当 main 分支有代码推送时执行
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  # 定义一个名叫 build 的任务
+  build-job:
+    runs-on: ubuntu-latest # 使用 Linux 环境
+
+    steps:
+      - name: 第一步：拉取仓库代码
+        uses: actions/checkout@v4
+
+      - name: 第二步：安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: 第三步：安装项目依赖
+        run: npm install
+
+      - name: 第四步：执行打包命令
+        run: npm run build
+
+      - name: 第五步：查看打包产物
+        run: ls -la dist/
