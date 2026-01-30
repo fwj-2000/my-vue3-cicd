@@ -8,7 +8,7 @@ on:
 jobs:
   # 定义一个名叫 build 的任务
   build-job:
-    runs-on: ubuntu-latest # 使用 Linux 环境
+    runs-on: ubuntu-latest
 
     steps:
       - name: 第一步：拉取仓库代码
@@ -20,11 +20,25 @@ jobs:
           # 将 18 改为 22，建议用当前最稳定的 22
           node-version: 22
 
-      - name: 第三步：安装项目依赖
-        run: npm install
+      # 【新增】在云端安装 pnpm
+      - name: 第三步：安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10 # 或者填你本地的版本号
 
-      - name: 第四步：执行打包命令
-        run: npm run build
+      - name: 第四步：使用 pnpm 安装依赖
+        # pnpm install --frozen-lockfile 是 CI 里的专业写法
+        # 意思是：严格按照 lock 文件安装，不准自动更新版本
+        run: pnpm install
 
-      - name: 第五步：查看打包产物
+      - name: 第五步：执行打包命令
+        run: pnpm run build
+
+      - name: 第六步：查看打包产物
         run: ls -la dist/
+
+      - name: 第七步：部署到 GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist # 部署 dist 文件夹下的内容
+          branch: gh-pages # 部署到 gh-pages 分支（GitHub 规定通常用这个分支放网页）
