@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
+    // 【关键修改点】添加这一行，对应你的仓库名
+    // 注意：前后都有斜杠
+    base: '/my-vue3-cicd/', 
+
     plugins: [
       vue(),
       vueDevTools(),
