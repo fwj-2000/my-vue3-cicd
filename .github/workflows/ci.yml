@@ -3,7 +3,7 @@ name: Vue3-Auto-Build
 # 触发条件：当 main 分支有代码推送时执行
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   # 定义一个名叫 build 的任务
@@ -17,7 +17,8 @@ jobs:
       - name: 第二步：安装 Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          # 将 18 改为 22，建议用当前最稳定的 22
+          node-version: 22
 
       - name: 第三步：安装项目依赖
         run: npm install
