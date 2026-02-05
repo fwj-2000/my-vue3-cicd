@@ -4,9 +4,19 @@
     :class="message.sender === 'user' ? 'user-message' : 'assistant-message'"
   >
     <div class="message-bubble">
+      <!-- 数字人思考中状态 -->
+      <div v-if="message.isThinking" class="thinking-state">
+        <span class="thinking-text">数字人思考中</span>
+        <span class="thinking-dots">
+          <span>.</span>
+          <span>.</span>
+          <span>.</span>
+        </span>
+      </div>
+
       <!-- 文本消息 -->
       <TextMessage
-        v-if="message.contentType === 'text'"
+        v-else-if="message.contentType === 'text'"
         :content="message.content"
         :enable-typing="message.sender === 'assistant'"
         :typing-speed="50"
@@ -164,6 +174,56 @@ const handleTagClick = (tag) => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+// 数字人思考中状态样式
+.thinking-state {
+  display: flex;
+  align-items: center;
+  // gap: 8px;
+  // padding: 8px 0;
+
+  .thinking-text {
+    font-size: @font-size-xs;
+    color: inherit;
+  }
+
+  .thinking-dots {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    span {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background-color: inherit;
+      border-radius: 50%;
+      animation: dotPulse 1.5s infinite ease-in-out;
+
+      &:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+    }
+  }
+}
+
+// 思考点动画
+@keyframes dotPulse {
+  0%,
+  60%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  30% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 </style>

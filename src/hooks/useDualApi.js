@@ -2,17 +2,18 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
 
 /**
-* 使用axios进行定期轮询的hooks，用于替代WebSocket
+* 使用axios进行双接口通信的hooks，一个接口用于发送消息，一个接口用于接收机器人回答
 *
-* @param {string} url - 轮询服务器地址
+* @param {string} sendUrl - 发送消息的接口地址
+* @param {string} receiveUrl - 接收机器人回答的接口地址
 * @param {Object} options - 配置选项
 * @param {number} options.pollingInterval - 轮询间隔（毫秒）
 * @param {number} options.reconnectInterval - 重连间隔（毫秒）
 * @param {number} options.timeout - 请求超时时间（毫秒）
 * @param {boolean} options.mock - 是否启用模拟模式
-* @returns {Object} 轮询状态和方法，与useWebSocket相同的API
+* @returns {Object} 通信状态和方法
 */
-export const usePolling = (url, options = {}) => {
+export const useDualApi = (sendUrl, receiveUrl, options = {}) => {
   // 默认配置
   const defaultOptions = {
     pollingInterval: 3000, // 默认3秒轮询一次
@@ -35,11 +36,13 @@ export const usePolling = (url, options = {}) => {
   let lastMessageId = null; // 上一条消息的ID，用于增量获取
   let isPolling = false; // 标记是否正在执行轮询请求
   let lastResponseData = null; // 上一次请求返回的数据缓存，用于去重
+  let isWaitingForResponse = false; // 标记是否正在等待回答接口的响应
+  let lastMessageTimestamp = null; // 上一条消息的时间戳，用于判断是否需要请求新接口
 
   /**
-   * 初始化轮询
+   * 初始化通信
    */
-  const initPolling = () => {
+  const initCommunication = () => {
     // 更新状态：正在连接中
     connectionStatus.value = 'connecting';
     connectionStatusText.value = '连接中...';
@@ -47,15 +50,15 @@ export const usePolling = (url, options = {}) => {
     try {
       if (mock) {
         // 使用模拟模式
-        console.log('使用模拟轮询模式');
-        startMockPolling();
+        console.log('使用模拟双接口通信模式');
+        startMockCommunication();
       } else {
-        // 使用真实轮询
-        console.log('使用真实轮询连接:', url);
+        // 使用真实接口通信
+        console.log('使用真实双接口通信:', { sendUrl, receiveUrl });
         startPolling();
       }
     } catch (error) {
-      console.error('轮询初始化失败:', error);
+      console.error('通信初始化失败:', error);
       connectionStatus.value = 'disconnected';
       connectionStatusText.value = '初始化失败，正在尝试重连...';
       startReconnect();
@@ -63,7 +66,7 @@ export const usePolling = (url, options = {}) => {
   };
 
   /**
-   * 开始轮询
+   * 开始轮询接收接口
    */
   const startPolling = () => {
     // 立即执行一次轮询
@@ -78,26 +81,22 @@ export const usePolling = (url, options = {}) => {
    */
   const poll = async () => {
     // 如果当前正在执行轮询请求，直接返回
-    if (isPolling) {
-      console.log('上一个轮询请求尚未完成，跳过本次请求');
+    if (isPolling || isWaitingForResponse) {
+      console.log('上一个轮询请求尚未完成或正在等待响应，跳过本次请求');
       return;
     }
     isPolling = true;
 
     try {
       // 发送GET请求获取消息，添加超时处理
-      const response = await axios.get(url, {
+      const response = await axios.get(receiveUrl, {
         params: {
           lastMessageId: lastMessageId
         },
         timeout: timeout // 添加超时设置
       });
       const { status, data: message } = response
-      console.log("🚀 ~ poll ~ status, data:", status, message)//
-      //  data: {
-      //     "assistant_text": "非常抱歉，该问题小益还未学习，请咨询人工向导或换个问题，谢谢！",
-      //     "user_text": "OMM 资 源 和 人 力 资 源 怎 么 样"
-      // }
+      console.log("🚀 ~ poll ~ status, data:", status, message)
 
       // 比较当前数据与上一次数据是否一致，一致则跳过处理
       const isDataSame = JSON.stringify(message) === JSON.stringify(lastResponseData);
@@ -107,21 +106,21 @@ export const usePolling = (url, options = {}) => {
       }
 
       if (status === 200) {
-        processMessage({ type: "message", ...message })//后端告知固定文本
+        // 标记正在等待响应处理完成
+        isWaitingForResponse = true;
+
+        processMessage({ type: "message", ...message });
         // 更新缓存数据
         lastResponseData = message;
-      }
-      // 处理返回的消息
-      // {'assistant_text': text, 'user_text': user_text}
 
-      // if (response.data && Array.isArray(response.data)) {
-      //   response.data.forEach(message => {
-      //     processMessage(message);
-      //   });
-      // } else if (response.data && response.data.type) {
-      //   // 单个消息处理
-      //   processMessage(response.data);
-      // }
+        // 更新最后消息时间戳
+        lastMessageTimestamp = Date.now();
+
+        // 延迟一段时间后再允许下一次轮询（确保文字显示完成）
+        setTimeout(() => {
+          isWaitingForResponse = false;
+        }, 1000); // 延迟 1 秒，确保文字显示完成
+      }
 
       // 更新连接状态为已连接
       if (connectionStatus.value !== 'connected') {
@@ -163,14 +162,11 @@ export const usePolling = (url, options = {}) => {
           addMessage(sender, content, contentType, timestamp, contentList);
           lastMessageId = message.id || Date.now();
         } else {
-          const { user_text, assistant_text } = message
-          if (user_text) {
-            addMessage('user', user_text)
-          }
+          const { assistant_text } = message
           if (assistant_text) {
             // 移除思考状态
             removeThinkingState();
-            addMessage('assistant', assistant_text)
+            addMessage('assistant', assistant_text);
           }
         }
         break;
@@ -190,27 +186,9 @@ export const usePolling = (url, options = {}) => {
   };
 
   /**
-   * 移除思考状态消息
-   */
-  const removeThinkingState = () => {
-    // 找到并移除正在思考的消息
-    const thinkingIndex = messages.value.findIndex(msg => msg.sender === 'assistant' && msg.isThinking);
-    if (thinkingIndex > -1) {
-      messages.value.splice(thinkingIndex, 1);
-    }
-  };
-
-  /**
    * 添加消息到对话列表
-   * @param {string} sender - 消息发送者（'user' 或 'assistant'）
-   * @param {string} content - 消息内容
-   * @param {string} [contentType='text'] - 消息内容类型（'text' 或 'image'）
-   * @param {number} [timestamp=Date.now()] - 消息发送时间戳
-   * @param {Array} [contentList=null] - 消息内容列表（用于流式消息）
-   * @param {boolean} [isStreaming=false] - 是否为流式消息
-   * @param {boolean} [isThinking=false] - 是否处于思考状态
    */
-  const addMessage = (sender, content, contentType = 'text', timestamp, contentList, isStreaming = true, isThinking = false) => {
+  const addMessage = (sender, content, contentType = 'text', timestamp, contentList, isThinking = false) => {
     // 创建消息对象
     const message = {
       sender,
@@ -218,7 +196,6 @@ export const usePolling = (url, options = {}) => {
       contentType,
       timestamp: timestamp || Date.now(),
       contentList,
-      isStreaming: false, // 默认非流式
       isThinking // 是否处于思考状态
     };
 
@@ -235,53 +212,50 @@ export const usePolling = (url, options = {}) => {
       addMessage('user', message.content);
 
       // 添加数字人思考中状态
-      const thinkingMessageId = Date.now();
-      addMessage('assistant', '', 'text', thinkingMessageId, null, false, true);
+      addMessage('assistant', '', 'text', Date.now(), null, true);
 
       // 使用POST请求发送消息，添加超时处理
-      await axios.post(url, message, {
+      const response = await axios.post(sendUrl, message, {
         timeout: timeout
       });
+
+      // 检查响应数据是否为 null 或错误
+      if (!response.data || response.data.error) {
+        console.error('消息发送接口返回错误或 null:', response.data);
+        // 移除思考状态
+        removeThinkingState();
+        // 添加错误提示消息
+        addMessage('assistant', '抱歉，系统暂时无法处理您的请求，请稍后重试。', 'text', Date.now());
+        return;
+      }
+
       console.log('消息发送成功:', message);
 
       // 注意：思考状态会在收到回复时通过 processMessage 函数移除
     } catch (error) {
       console.error('消息发送失败:', error);
+      // 移除思考状态
+      removeThinkingState();
+      // 添加错误提示消息
+      addMessage('assistant', '抱歉，系统暂时无法处理您的请求，请稍后重试。', 'text', Date.now());
       throw error;
     }
   };
 
   /**
-   * 开始模拟轮询
+   * 开始模拟通信
    */
-  const startMockPolling = () => {
+  const startMockCommunication = () => {
     // 更新状态为已连接
     connectionStatus.value = 'connected';
     connectionStatusText.value = '已连接（模拟）';
-
-    // 模拟消息生成
-    const mockMessages = [
-      {
-        sender: 'assistant',
-        content: '你好！我是智能助手，很高兴为你服务',
-        contentType: 'text',
-        // contentList: ['首件过程的检测频率如何？', '针对不可检测项，如何预防不良流出？', '项目检测过程中，如何避免设备故障？', '如何联系客服？'],
-        timestamp: Date.now()
-      },
-      { sender: 'user', content: '如何使用这个系统？', contentType: 'text', timestamp: Date.now() },
-      { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
-      { sender: 'user', content: '如何使用这个系统？', contentType: 'text' },
-      { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
-      // { sender: 'user', content: '如何使用这个系统？', contentType: 'text' },
-      // { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
-    ];
 
     // 模拟用户发送消息后，数字人开始思考
     // 先添加一个用户消息
     addMessage('user', '你好，我想了解一下这个系统的使用方法', 'text', Date.now());
 
     // 添加思考状态
-    addMessage('assistant', '', 'text', Date.now(), null, false, true);
+    addMessage('assistant', '', 'text', Date.now(), null, true);
 
     // 延迟一段时间后发送助手回答
     setTimeout(() => {
@@ -292,6 +266,13 @@ export const usePolling = (url, options = {}) => {
       addMessage('assistant', '你好！我是智能助手，很高兴为你服务。你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流。', 'text', Date.now());
 
       // 继续发送其他模拟消息
+      const mockMessages = [
+        { sender: 'user', content: '如何使用这个系统？', contentType: 'text', timestamp: Date.now() },
+        { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
+        { sender: 'user', content: '如何使用这个系统？', contentType: 'text' },
+        { sender: 'assistant', content: '你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流你可以直接发送消息，系统会自动回复，同时左侧会显示数字人流', contentType: 'text' },
+      ];
+
       let index = 0;
       const interval = setInterval(() => {
         if (index >= mockMessages.length) {
@@ -300,15 +281,34 @@ export const usePolling = (url, options = {}) => {
         }
 
         const mockMsg = mockMessages[index++];
-        const message = {
-          type: 'message',
-          ...mockMsg,
-          timestamp: Date.now()
-        };
 
-        processMessage(message);
-      }, 2000);
+        // 如果是用户消息，添加思考状态
+        if (mockMsg.sender === 'user') {
+          addMessage(mockMsg.sender, mockMsg.content, mockMsg.contentType, mockMsg.timestamp);
+          addMessage('assistant', '', 'text', Date.now(), null, true);
+
+          // 延迟显示助手回答
+          setTimeout(() => {
+            removeThinkingState();
+            const nextMsg = mockMessages[index++];
+            if (nextMsg && nextMsg.sender === 'assistant') {
+              addMessage(nextMsg.sender, nextMsg.content, nextMsg.contentType, Date.now());
+            }
+          }, 2000);
+        }
+      }, 4000);
     }, 3000); // 延迟 3 秒，模拟思考时间
+  };
+
+  /**
+   * 移除思考状态消息
+   */
+  const removeThinkingState = () => {
+    // 找到并移除正在思考的消息
+    const thinkingIndex = messages.value.findIndex(msg => msg.sender === 'assistant' && msg.isThinking);
+    if (thinkingIndex > -1) {
+      messages.value.splice(thinkingIndex, 1);
+    }
   };
 
   /**
@@ -316,7 +316,7 @@ export const usePolling = (url, options = {}) => {
    */
   const startReconnect = () => {
     stopReconnect(); // 先停止之前的重连定时器
-    reconnectTimer = setTimeout(initPolling, reconnectInterval);
+    reconnectTimer = setTimeout(initCommunication, reconnectInterval);
   };
 
   /**
@@ -340,9 +340,9 @@ export const usePolling = (url, options = {}) => {
   };
 
   /**
-   * 关闭轮询连接
+   * 关闭通信连接
    */
-  const closePolling = () => {
+  const closeCommunication = () => {
     stopPolling();
     stopReconnect();
     connectionStatus.value = 'disconnected';
@@ -353,24 +353,24 @@ export const usePolling = (url, options = {}) => {
    * 组件挂载时执行
    */
   onMounted(() => {
-    initPolling();
+    initCommunication();
   });
 
   /**
    * 组件卸载前执行
    */
   onBeforeUnmount(() => {
-    closePolling();
+    closeCommunication();
   });
 
-  // 返回与useWebSocket相同的API
+  // 返回API
   return {
     connectionStatus,
     connectionStatusText,
     messages,
     sendMessage,
     addMessage,
-    closePolling: closePolling,
-    initPolling: initPolling
+    closeCommunication,
+    initCommunication
   };
 };

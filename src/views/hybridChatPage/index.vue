@@ -40,26 +40,30 @@
 import { ref, onMounted } from "vue";
 import DigitalHuman from "../digitalHuman/index.vue";
 import ChatMessages from "../chatMessages/index.vue";
-import { usePolling } from "../../hooks/usePolling";
+import { useDualApi } from "../../hooks/useDualApi";
 // import VideoMessage from "@/views/chatMessages/components/content/VideoMessage.vue";
+// 导入视频资源
+import movieVideo from "@/assets/image/movie.mp4";
 
 defineOptions({
   name: "hybridChatPage",
 });
-// 直接使用相对路径引用视频资源
-const videoUrl = "/src/assets/image/movie.mp4";
 
-// 轮询配置
-const wsUrl = "/api/json"; // 使用代理地址，避免跨域问题
+// 使用导入的视频资源
+const videoUrl = movieVideo;
+
+// 双接口配置
+const sendUrl = "/api/send"; // 发送消息接口
+const receiveUrl = "/api/receive"; // 接收回答接口
 const streamUrl = ref(
-  `${import.meta.env.VITE_STREAM_BASE_URL}/video_feed.mjpeg`
+  `${import.meta.env.VITE_STREAM_BASE_URL}/video_feed.mjpeg`,
 );
-// 使用轮询 hooks
+// 使用双接口 hooks
 const { connectionStatus, connectionStatusText, messages, addMessage } =
-  usePolling(wsUrl, {
+  useDualApi(sendUrl, receiveUrl, {
     pollingInterval: 1000,
     reconnectInterval: 3000,
-    mock: true, // 启用模拟模式
+    mock: true, // 启用模拟模式测试
   });
 
 // 组件挂载时添加模拟消息用于测试
